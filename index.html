@@ -40,12 +40,16 @@ html,body{height:100%;overflow:hidden;background:#000}
 .screen{--u:min(1cqw,calc(1cqh*1.7778));container-type:size;position:absolute;inset:0;overflow:hidden;color:#f2f4f8;
   background:radial-gradient(120% 140% at 70% 10%,#1b2a4a 0%,#0c1222 55%,#070a12 100%);display:flex;user-select:none;-webkit-user-select:none;
   padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
-.gear{position:fixed;left:max(10px,env(safe-area-inset-left));bottom:max(10px,env(safe-area-inset-bottom));width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.16);color:#fff;cursor:pointer;z-index:10;display:grid;place-items:center;padding:0}
+.gear{position:fixed;right:max(10px,env(safe-area-inset-right));top:max(10px,env(safe-area-inset-top));width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.16);color:#fff;cursor:pointer;z-index:30;display:grid;place-items:center;padding:0}
+.gear.on,.gear.on:hover{background:var(--ink);color:var(--bg)}
 .gear:hover{background:rgba(255,255,255,.28)}
 .gear svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
-.sheet{position:fixed;inset:0;z-index:20;background:var(--bg);overflow:auto}
+.sheet{position:fixed;inset:0;z-index:20;background:var(--bg);overflow:auto;padding-top:env(safe-area-inset-top);-webkit-overflow-scrolling:touch}
+.sheet .wrap{padding-top:64px}
+.sheetfoot{position:sticky;bottom:0;padding:14px 0 calc(14px + env(safe-area-inset-bottom));background:linear-gradient(to bottom,transparent,var(--bg) 35%)}
+.sheetfoot .btn{width:100%;min-height:48px;font-size:1rem}
 .sheet[hidden]{display:none}
-.sheethead{display:flex;justify-content:flex-end}
+
 .side{width:calc(13 * var(--u));flex:none;display:flex;flex-direction:column;align-items:center;padding:calc(2 * var(--u)) 0 calc(1.6 * var(--u));gap:calc(1.2 * var(--u));background:rgba(0,0,0,.35);border-right:1px solid rgba(255,255,255,.08)}
 .clock{font-weight:800;font-size:calc(2.6 * var(--u));font-variant-numeric:tabular-nums;letter-spacing:.02em}
 .status{display:flex;gap:calc(.6 * var(--u));align-items:flex-end;height:calc(1.6 * var(--u))}
@@ -147,28 +151,34 @@ legend{font-weight:600;font-size:.9rem;padding:0;margin-bottom:6px}
 .tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 
 /* ---------- Responsive ---------- */
-.main{min-height:0}
+.screen{--u:min(1cqw,calc(1cqh*1.7778));display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:minmax(0,1fr) auto;grid-template-areas:"main main" "dock home"}
+.side{display:contents}
+.main{grid-area:main;min-height:0;min-width:0}
+.dock{grid-area:dock;flex:none;flex-direction:row;justify-content:flex-start;align-items:center;padding:calc(var(--u)*1.2) calc(var(--u)*3);gap:calc(var(--u)*1.8);min-width:0}
+.dock .ico{width:calc(var(--u)*6.4);height:calc(var(--u)*6.4);border-radius:calc(var(--u)*1.7)}
+.home{grid-area:home;margin:calc(var(--u)*1.2) calc(var(--u)*3) calc(var(--u)*1.2) 0;width:calc(var(--u)*6.4);height:calc(var(--u)*6.4)}
+.home svg{width:calc(var(--u)*3.2);height:calc(var(--u)*3.2)}
+.grid{padding-top:56px}
+.editbar{right:auto;left:calc(var(--u)*2);top:calc(var(--u)*1.2);font-size:calc(var(--u)*2.2)}
 .tile .lbl{font-size:calc(var(--u)*2.2)}
-@media (orientation:landscape){
-  .side{padding-bottom:calc(var(--u)*1.6 + 62px)}
-}
+.dial{align-items:stretch}
+.keys{display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:1fr;gap:calc(var(--u)*1.2);flex:1;min-width:0;max-width:calc(var(--u)*42)}
+.key{border:0;border-radius:calc(var(--u)*2);background:rgba(255,255,255,.12);color:#fff;font-size:calc(var(--u)*3.4);font-weight:700;cursor:pointer;min-height:calc(var(--u)*5.5)}
+.key:active{background:rgba(255,255,255,.28)}
+.dialside{flex:1;display:flex;flex-direction:column;justify-content:center;gap:calc(var(--u)*1.2);min-width:0}
+.dialside .pill{align-self:flex-start;margin-top:0!important}
+.dnum{font-size:calc(var(--u)*4);font-weight:800;font-variant-numeric:tabular-nums;min-height:1.3em;word-break:break-all}
+.pill.off{opacity:.35;pointer-events:none}
 @media (orientation:portrait){
-  .screen{--u:min(2.4cqw,calc(1cqh*1.1));display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto minmax(0,1fr) auto;grid-template-areas:"clock status" "main main" "dock home"}
-  .side{display:contents}
-  .clock{grid-area:clock;padding:calc(var(--u)*2) calc(var(--u)*3) 0;font-size:calc(var(--u)*3.2)}
-  .status{grid-area:status;align-self:center;margin:calc(var(--u)*2) calc(var(--u)*3) 0 0;height:calc(var(--u)*2.4)}
-  .status i{width:calc(var(--u)*.7)}
-  .main{grid-area:main}
-  .dock{grid-area:dock;flex:none;flex-direction:row;justify-content:flex-start;align-items:center;padding:calc(var(--u)*1.4) 0 calc(var(--u)*1.4) 62px;gap:calc(var(--u)*1.8);min-width:0}
-  .dock .ico{width:calc(var(--u)*6.4);height:calc(var(--u)*6.4);border-radius:calc(var(--u)*1.7)}
-  .home{grid-area:home;margin:calc(var(--u)*1.4) calc(var(--u)*2) calc(var(--u)*1.4) 0;width:calc(var(--u)*6.4);height:calc(var(--u)*6.4)}
-  .home svg{width:calc(var(--u)*3.2);height:calc(var(--u)*3.2)}
-  .grid{grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(4,1fr);padding:calc(var(--u)*2) calc(var(--u)*2) 0;gap:calc(var(--u)*1) calc(var(--u)*1)}
+  .screen{--u:min(2.4cqw,calc(1cqh*1.1))}
+  .grid{grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(4,1fr);padding:56px calc(var(--u)*2) 0;gap:calc(var(--u)*1)}
   .tile .lbl{font-size:calc(var(--u)*1.85)}
   .body{flex-direction:column}
   .body>.list{width:auto!important;flex:1 1 52%;min-height:0}
   .body>.map{order:-1;flex:1 1 40%;min-height:0}
   .body>div:not(.cover):not(.map):not(.list){align-self:stretch}
+  .dial .dialside{order:-1;flex:none}
+  .keys{max-width:none;min-height:0}
   .apphead h2{font-size:calc(var(--u)*2.8)}
   .row{font-size:calc(var(--u)*2.3)}
   .small{font-size:calc(var(--u)*2)}
@@ -180,7 +190,6 @@ legend{font-weight:600;font-size:.9rem;padding:0;margin-bottom:6px}
 <button class="gear" id="gear" type="button" aria-label="Apps verwalten" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></button>
 <div class="sheet" id="sheet" hidden>
 <div class="wrap">
-  <div class="sheethead"><button class="btn" id="close" type="button">Schliessen</button></div>
   <div class="cols">
     <section class="panel" aria-labelledby="h-list">
       <h2 id="h-list">Installierte Apps <span id="count" class="sub"></span></h2>
@@ -222,6 +231,7 @@ legend{font-weight:600;font-size:.9rem;padding:0;margin-bottom:6px}
       </form>
     </section>
   </div>
+  <div class="sheetfoot"><button class="btn primary" id="close" type="button">Schliessen</button></div>
 </div>
 </div>
 
@@ -309,7 +319,7 @@ legend{font-weight:600;font-size:.9rem;padding:0;margin-bottom:6px}
     var now=new Date();
     $screen.className='screen'+(S.edit?' edit':'');
     $screen.innerHTML=
-      '<div class="side"><div class="clock" id="clock">'+hm(now)+'</div><div class="status" aria-hidden="true"><i></i><i></i><i></i><i></i></div><div class="dock">'+dock+'</div>'+
+      '<div class="side"><div class="dock">'+dock+'</div>'+
       '<button class="home" id="home" type="button" aria-label="Home">'+svg('home').replace('<svg','<svg style="stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"')+'</button></div>'+
       '<div class="main">'+
         (S.edit?'<button class="editbar" data-act="done" type="button">Fertig</button>':'')+
@@ -358,13 +368,13 @@ legend{font-weight:600;font-size:.9rem;padding:0;margin-bottom:6px}
         '<div class="bar"><b id="pb"></b></div><div class="small" style="display:flex;justify-content:space-between"><span id="pt">0:00</span><span>'+Math.floor(t[2]/60)+':'+pad(t[2]%60)+'</span></div>'+
         '<div class="ctrls" style="margin-top:calc(1.6 * var(--u))"><button data-m="prev" type="button" aria-label="Zurück">&#9198;</button><button class="play" data-m="play" id="pp" type="button" aria-label="Wiedergabe">'+(playing?'&#10074;&#10074;':'&#9654;')+'</button><button data-m="next" type="button" aria-label="Weiter">&#9197;</button></div><div>'+openLink(a,'','In '+a.name+' öffnen')+'</div></div></div>';
     }else if(a.tpl==='phone'||a.tpl==='msg'){
-      var isMsg=a.tpl==='msg';
-      inner='<div class="body"><div class="list" style="flex:1">'+CONTACTS.map(function(c){
-        var av='<span style="width:calc(4.4 * var(--u));height:calc(4.4 * var(--u));border-radius:50%;background:#55627a;display:grid;place-items:center;font-weight:800;font-size:calc(1.8 * var(--u));flex:none">'+esc(c[0].charAt(0))+'</span><span style="flex:1">'+esc(c[0])+'<br><span class="small">'+esc(c[1])+'</span></span>';
-        var btn='<span class="pill" style="padding:calc(.4 * var(--u)) calc(1.4 * var(--u));font-size:calc(1.6 * var(--u))">'+(isMsg?'Schreiben &#8599;':'Anrufen')+'</span>';
-        if(isMsg){var h=linkFor(a,c[1]);return h?'<a class="row" style="text-decoration:none" href="'+esc(h)+'" target="_blank" rel="noopener">'+av+btn+'</a>':'<div class="row">'+av+'</div>'}
-        return '<button class="row" data-call="'+esc(c[0])+'" type="button">'+av+btn+'</button>'}).join('')+'</div></div>'+
-        ((S.call&&!isMsg)?'<div class="overlay"><div class="av">'+esc(S.call.charAt(0))+'</div><div class="big">'+esc(S.call)+'</div><div class="small" id="ct" style="font-size:calc(2 * var(--u))">Verbindung wird aufgebaut…</div>'+openLink(a,contactNum(S.call),'In '+a.name+' anrufen')+'<button class="pill red" data-hang="1" type="button">Auflegen</button></div>':'');
+      var isMsg=a.tpl==='msg', num=S.dial||'';
+      var keys=['1','2','3','4','5','6','7','8','9','+','0','back'];
+      var go=linkFor(a,num), ok=!!(num&&go);
+      inner='<div class="body dial"><div class="keys">'+keys.map(function(k){return '<button class="key" data-key="'+k+'" type="button"'+(k==='back'?' aria-label="Löschen">&#9003;':'>'+k)+'</button>'}).join('')+'</div>'+
+        '<div class="dialside"><div class="dnum" id="dnum">'+(esc(num)||'&nbsp;')+'</div>'+
+        '<a class="pill'+(ok?'':' off')+'" id="dgo" style="text-decoration:none"'+(ok?' href="'+esc(go)+'" target="_blank" rel="noopener"':'')+'>'+(isMsg?'Nachricht schreiben':'Anrufen')+' &#8599;</a>'+
+        openLink(a,'',(isMsg?'Nachrichten':'Telefon')+'-App öffnen')+'</div></div>';
     }else{
       inner='<div class="body" style="align-items:center;justify-content:center;flex-direction:column;text-align:center"><div class="cover" style="background:'+a.color+';width:calc(16 * var(--u));height:calc(16 * var(--u))">'+svg(a.icon)+'</div><div class="big" style="margin-top:calc(1.4 * var(--u))">'+esc(a.name)+'</div><div class="small" style="font-size:calc(2.1 * var(--u));max-width:calc(60 * var(--u))">'+esc(a.note||'Diese App hat keinen Inhalt.')+'</div>'+openLink(a,'','In '+a.name+' öffnen')+'</div>';
     }
@@ -387,6 +397,14 @@ legend{font-weight:600;font-size:.9rem;padding:0;margin-bottom:6px}
     save();renderScreen();
   }
   function goHome(){S.open=null;S.call=null;stopCall();renderScreen()}
+  function updateDial(){
+    var a=S.open&&byId(S.open), n=document.getElementById('dnum'), g=document.getElementById('dgo');
+    if(!a||!n||!g)return;
+    n.textContent=S.dial||'\u00a0';
+    var h=linkFor(a,S.dial||'');
+    if(S.dial&&h){g.setAttribute('href',h);g.setAttribute('target','_blank');g.setAttribute('rel','noopener');g.classList.remove('off')}
+    else{g.removeAttribute('href');g.classList.add('off')}
+  }
   function stopCall(){if(callTimer){clearInterval(callTimer);callTimer=null}}
 
   /* Events im Display */
@@ -416,6 +434,10 @@ legend{font-weight:600;font-size:.9rem;padding:0;margin-bottom:6px}
       if(m==='next')setTrack(trackIdx+1);
       if(m==='prev')setTrack(trackIdx-1);
       return}
+    t=e.target.closest('[data-key]');
+    if(t){var kk=t.getAttribute('data-key'), cur=S.dial||'';
+      if(kk==='back')S.dial=cur.slice(0,-1);else if(cur.length<20)S.dial=cur+kk;
+      updateDial();return}
     t=e.target.closest('[data-call]');
     if(t){S.call=t.getAttribute('data-call');callSecs=0;renderScreen();
       stopCall();callTimer=setInterval(function(){callSecs++;var el=document.getElementById('ct');if(el)el.textContent=callSecs<2?'Klingelt…':'Verbunden '+Math.floor(callSecs/60)+':'+pad(callSecs%60)},1000);return}
@@ -433,8 +455,9 @@ legend{font-weight:600;font-size:.9rem;padding:0;margin-bottom:6px}
 
   /* Verwaltung ein-/ausblenden */
   var $sheet=document.getElementById('sheet'), $gear=document.getElementById('gear');
-  function openSheet(){$sheet.hidden=false;$gear.setAttribute('aria-expanded','true')}
-  function closeSheet(){$sheet.hidden=true;$gear.setAttribute('aria-expanded','false')}
+  var GEAR_SVG=$gear.innerHTML, X_SVG='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+  function openSheet(){$sheet.hidden=false;$gear.classList.add('on');$gear.innerHTML=X_SVG;$gear.setAttribute('aria-expanded','true');$gear.setAttribute('aria-label','Schliessen')}
+  function closeSheet(){$sheet.hidden=true;$gear.classList.remove('on');$gear.innerHTML=GEAR_SVG;$gear.setAttribute('aria-expanded','false');$gear.setAttribute('aria-label','Apps verwalten')}
   $gear.addEventListener('click',function(){$sheet.hidden?openSheet():closeSheet()});
   document.getElementById('close').addEventListener('click',closeSheet);
   document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!$sheet.hidden)closeSheet()});
@@ -486,7 +509,7 @@ legend{font-weight:600;font-size:.9rem;padding:0;margin-bottom:6px}
     var ul=document.getElementById('applist');
     if(!S.apps.length){ul.innerHTML='<li style="color:var(--muted)">Keine Apps installiert. Füge rechts eine hinzu.</li>';return}
     ul.innerHTML=S.apps.map(function(a,i){
-      return '<li><span class="chip" style="background:'+a.color+'">'+svg(a.icon)+'</span><span class="n"><b>'+esc(a.name)+'</b><small>'+TPL_LABEL[a.tpl]+(a.link?' · mit echter App verknüpft':'')+'</small></span><span class="mv"><button data-up="'+a.id+'" type="button" aria-label="'+esc(a.name)+' nach oben"'+(i===0?' disabled':'')+'>&#9650;</button><button data-down="'+a.id+'" type="button" aria-label="'+esc(a.name)+' nach unten"'+(i===S.apps.length-1?' disabled':'')+'>&#9660;</button></span><button class="btn danger" data-rm="'+a.id+'" type="button" aria-label="'+esc(a.name)+' löschen">Löschen</button></li>';
+      return '<li><span class="chip" style="background:'+a.color+'">'+svg(a.icon)+'</span><span class="n"><b>'+esc(a.name)+'</b><small>'+TPL_LABEL[a.tpl]+(a.link?' · verknüpft':'')+'</small></span><span class="mv"><button data-up="'+a.id+'" type="button" aria-label="'+esc(a.name)+' nach oben"'+(i===0?' disabled':'')+'>&#9650;</button><button data-down="'+a.id+'" type="button" aria-label="'+esc(a.name)+' nach unten"'+(i===S.apps.length-1?' disabled':'')+'>&#9660;</button></span><button class="btn danger" data-rm="'+a.id+'" type="button" aria-label="'+esc(a.name)+' löschen">Löschen</button></li>';
     }).join('');
   }
   document.getElementById('applist').addEventListener('click',function(e){
@@ -514,7 +537,7 @@ legend{font-weight:600;font-size:.9rem;padding:0;margin-bottom:6px}
     var err=document.getElementById('err'), name=document.getElementById('f-name').value.trim();
     if(!name){err.textContent='Bitte einen App-Namen eingeben.';return}
     if(S.apps.length>=MAX_APPS){err.textContent='Maximal '+MAX_APPS+' Apps möglich. Lösche zuerst eine App.';return}
-    if(S.apps.some(function(a){return a.name.toLowerCase()===name.toLowerCase()})){err.textContent='Eine App mit diesem Namen existiert bereits.';return}
+
     var link=document.getElementById('f-link').value.trim();
     if(link&&!SAFE.test(link)){err.textContent='Der Link muss mit https://, tel:, sms:, music:, podcasts:, maps:, comgooglemaps: oder waze: beginnen.';return}
     err.textContent='';
@@ -538,7 +561,8 @@ legend{font-weight:600;font-size:.9rem;padding:0;margin-bottom:6px}
     {k:'apple-music',label:'Apple Musik',tpl:'music',icon:'music',color:'#ff453a',link:'https://music.apple.com'},
     {k:'apple-podcasts',label:'Apple Podcasts',tpl:'music',icon:'mic',color:'#af52de',link:'https://podcasts.apple.com'},
     {k:'apple-phone',label:'Telefon',tpl:'phone',icon:'phone',color:'#1fbf6a',link:'tel:{q}'},
-    {k:'apple-msg',label:'Nachrichten',tpl:'msg',icon:'msg',color:'#30b0c7',link:'sms:{q}'}
+    {k:'apple-msg',label:'Nachrichten',tpl:'msg',icon:'msg',color:'#30b0c7',link:'sms:{q}'},
+    {k:'swissradio',label:'SwissRadio',tpl:'generic',icon:'radio',color:'#ff453a',link:'https://apps.apple.com/app/id345280515',note:'Schweizer Radio hören mit der SwissRadio-App.'}
   ];
   var $pre=document.getElementById('f-preset'), lastPre='';
   $pre.innerHTML='<option value="">Eigene App (ohne Vorlage)</option>'+PRESETS.map(function(p){return '<option value="'+p.k+'">'+esc(p.label)+'</option>'}).join('');
@@ -551,6 +575,7 @@ legend{font-weight:600;font-size:.9rem;padding:0;margin-bottom:6px}
     var ci=COLORS.indexOf(p.color); if(ci>=0)document.getElementById('co-'+ci).checked=true;
     document.getElementById('f-tpl').value=p.tpl;
     document.getElementById('f-link').value=p.link;
+    if(p.note)document.getElementById('f-note').value=p.note;
   });
 
   load();renderScreen();renderList();

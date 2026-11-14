@@ -343,8 +343,9 @@ legend{font-weight:600;font-size:.9rem;padding:0;margin-bottom:6px}
   }
   function openLink(a,q,label){
     var h=linkFor(a,q);
-    return h?'<a class="pill" style="margin-top:calc(1.2 * var(--u));text-decoration:none" href="'+esc(h)+'" target="_blank" rel="noopener">'+esc(label)+' &#8599;</a>':'';
+    return h?'<a class="pill" style="margin-top:calc(1.2 * var(--u));text-decoration:none" href="'+esc(h)+'"'+tgt(h)+'>'+esc(label)+' &#8599;</a>':'';
   }
+  function tgt(h){return /^https?:/i.test(h)?' target="_blank" rel="noopener"':''}
   function contactNum(name){var c=CONTACTS.filter(function(x){return x[0]===name})[0];return c?c[1]:''}
   var DESTS=[['Zuhause',12,8.4],['Arbeit',27,19.2],['Tankstelle',6,3.1],['Parkhaus Bahnhof',18,11.6]];
 
@@ -373,7 +374,7 @@ legend{font-weight:600;font-size:.9rem;padding:0;margin-bottom:6px}
       var go=linkFor(a,num), ok=!!(num&&go);
       inner='<div class="body dial"><div class="keys">'+keys.map(function(k){return '<button class="key" data-key="'+k+'" type="button"'+(k==='back'?' aria-label="Löschen">&#9003;':'>'+k)+'</button>'}).join('')+'</div>'+
         '<div class="dialside"><div class="dnum" id="dnum">'+(esc(num)||'&nbsp;')+'</div>'+
-        '<a class="pill'+(ok?'':' off')+'" id="dgo" style="text-decoration:none"'+(ok?' href="'+esc(go)+'" target="_blank" rel="noopener"':'')+'>'+(isMsg?'Nachricht schreiben':'Anrufen')+' &#8599;</a>'+
+        '<a class="pill'+(ok?'':' off')+'" id="dgo" style="text-decoration:none"'+(ok?' href="'+esc(go)+'"'+tgt(go):'')+'>'+(isMsg?'Nachricht schreiben':'Anrufen')+' &#8599;</a>'+
         openLink(a,'',(isMsg?'Nachrichten':'Telefon')+'-App öffnen')+'</div></div>';
     }else{
       inner='<div class="body" style="align-items:center;justify-content:center;flex-direction:column;text-align:center"><div class="cover" style="background:'+a.color+';width:calc(16 * var(--u));height:calc(16 * var(--u))">'+svg(a.icon)+'</div><div class="big" style="margin-top:calc(1.4 * var(--u))">'+esc(a.name)+'</div><div class="small" style="font-size:calc(2.1 * var(--u));max-width:calc(60 * var(--u))">'+esc(a.note||'Diese App hat keinen Inhalt.')+'</div>'+openLink(a,'','In '+a.name+' öffnen')+'</div>';
@@ -402,7 +403,7 @@ legend{font-weight:600;font-size:.9rem;padding:0;margin-bottom:6px}
     if(!a||!n||!g)return;
     n.textContent=S.dial||'\u00a0';
     var h=linkFor(a,S.dial||'');
-    if(S.dial&&h){g.setAttribute('href',h);g.setAttribute('target','_blank');g.setAttribute('rel','noopener');g.classList.remove('off')}
+    if(S.dial&&h){g.setAttribute('href',h);if(/^https?:/i.test(h)){g.setAttribute('target','_blank');g.setAttribute('rel','noopener')}else{g.removeAttribute('target');g.removeAttribute('rel')}g.classList.remove('off')}
     else{g.removeAttribute('href');g.classList.add('off')}
   }
   function stopCall(){if(callTimer){clearInterval(callTimer);callTimer=null}}
@@ -562,7 +563,7 @@ legend{font-weight:600;font-size:.9rem;padding:0;margin-bottom:6px}
     {k:'apple-podcasts',label:'Apple Podcasts',tpl:'music',icon:'mic',color:'#af52de',link:'https://podcasts.apple.com'},
     {k:'apple-phone',label:'Telefon',tpl:'phone',icon:'phone',color:'#1fbf6a',link:'tel:{q}'},
     {k:'apple-msg',label:'Nachrichten',tpl:'msg',icon:'msg',color:'#30b0c7',link:'sms:{q}'},
-    {k:'swissradio',label:'SwissRadio',tpl:'generic',icon:'radio',color:'#ff453a',link:'https://apps.apple.com/app/id345280515',note:'Schweizer Radio hören mit der SwissRadio-App.'}
+    {k:'playsrf',label:'Play SRF',tpl:'generic',icon:'radio',color:'#ff453a',link:'https://apps.apple.com/app/id638194352',note:'Radio und Video von SRF mit der Play-SRF-App.'}
   ];
   var $pre=document.getElementById('f-preset'), lastPre='';
   $pre.innerHTML='<option value="">Eigene App (ohne Vorlage)</option>'+PRESETS.map(function(p){return '<option value="'+p.k+'">'+esc(p.label)+'</option>'}).join('');

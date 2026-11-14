@@ -35,9 +35,19 @@ h1{font-size:1.4rem;margin:0;font-weight:800;letter-spacing:-.01em}
 .sub{color:var(--muted);margin:2px 0 0;font-size:.92rem}
 
 /* ---------- Display ---------- */
-.stage{overflow-x:auto;border-radius:22px}
-.bezel{min-width:640px;background:#050608;padding:1.6%;border-radius:22px;box-shadow:0 14px 40px rgba(0,0,0,.35)}
-.screen{container-type:size;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;position:relative;color:#f2f4f8;
+html,body{height:100%;overflow:hidden;background:#000}
+.stage{position:fixed;inset:0;background:#000;overflow:hidden;container-type:size}
+.rot{--W:100cqw;--H:100cqh;position:absolute;top:0;left:0;width:var(--W);height:var(--H);display:grid;place-items:center;background:#000}
+@media (orientation:portrait){
+  .rot{--W:100cqh;--H:100cqw;left:100cqw;transform-origin:0 0;transform:rotate(90deg)}
+}
+.gear{position:fixed;left:10px;bottom:10px;width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.16);color:#fff;cursor:pointer;z-index:10;display:grid;place-items:center;padding:0}
+.gear:hover{background:rgba(255,255,255,.28)}
+.gear svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
+.sheet{position:fixed;inset:0;z-index:20;background:var(--bg);overflow:auto}
+.sheet[hidden]{display:none}
+.sheethead{display:flex;justify-content:flex-end}
+.screen{container-type:size;width:min(var(--W),calc(var(--H)*16/9));aspect-ratio:16/9;border-radius:14px;overflow:hidden;position:relative;color:#f2f4f8;
   background:radial-gradient(120% 140% at 70% 10%,#1b2a4a 0%,#0c1222 55%,#070a12 100%);display:flex;user-select:none;-webkit-user-select:none}
 .side{width:13cqw;flex:none;display:flex;flex-direction:column;align-items:center;padding:2cqw 0 1.6cqw;gap:1.2cqw;background:rgba(0,0,0,.35);border-right:1px solid rgba(255,255,255,.08)}
 .clock{font-weight:800;font-size:2.6cqw;font-variant-numeric:tabular-nums;letter-spacing:.02em}
@@ -141,14 +151,11 @@ legend{font-weight:600;font-size:.9rem;padding:0;margin-bottom:6px}
 </style>
 </head>
 <body>
+<div class="stage"><div class="rot"><div class="screen" id="screen" aria-label="Fahrzeugdisplay"></div></div></div>
+<button class="gear" id="gear" type="button" aria-label="Apps verwalten" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></button>
+<div class="sheet" id="sheet" hidden>
 <div class="wrap">
-  <header>
-    <h1>CarPlay Simulator</h1>
-    <p class="sub">Tippe auf eine App, um sie zu öffnen. Die Schaltflächen mit Pfeil starten die echte App (Apple Karten, Telefon, Musik, Podcasts, Nachrichten oder Google Maps) auf deinem iPhone oder Mac. Apps lassen sich unten hinzufügen und löschen. Langes Drücken auf dem Display startet den Bearbeitungsmodus.</p>
-  </header>
-
-  <div class="stage"><div class="bezel"><div class="screen" id="screen" aria-label="Fahrzeugdisplay"></div></div></div>
-
+  <div class="sheethead"><button class="btn" id="close" type="button">Schliessen</button></div>
   <div class="cols">
     <section class="panel" aria-labelledby="h-list">
       <h2 id="h-list">Installierte Apps <span id="count" class="sub"></span></h2>
@@ -180,9 +187,8 @@ legend{font-weight:600;font-size:.9rem;padding:0;margin-bottom:6px}
           </select>
         </label>
         <label class="f" for="f-link">Link zur echten App
-          <input type="text" id="f-link" placeholder="https://… oder tel:{q}" autocomplete="off" inputmode="url">
+          <input type="text" id="f-link" placeholder="https://… oder tel:{q}  ({q} = Ziel bzw. Nummer)" autocomplete="off" inputmode="url">
         </label>
-        <p class="sub" style="margin:6px 0 0;font-size:.82rem">{q} wird durch das Ziel bzw. die Nummer ersetzt. Erlaubt sind https, tel, sms, music, podcasts, maps, comgooglemaps und waze.</p>
         <label class="f" for="f-note">Notiz (nur bei „Allgemein“)
           <input type="text" id="f-note" maxlength="80" placeholder="Text, der in der App erscheint" autocomplete="off">
         </label>
@@ -191,6 +197,7 @@ legend{font-weight:600;font-size:.9rem;padding:0;margin-bottom:6px}
       </form>
     </section>
   </div>
+</div>
 </div>
 
 <script>
@@ -275,7 +282,7 @@ legend{font-weight:600;font-size:.9rem;padding:0;margin-bottom:6px}
       '<div class="side"><div class="clock" id="clock">'+hm(now)+'</div><div class="status" aria-hidden="true"><i></i><i></i><i></i><i></i></div><div class="dock">'+dock+'</div>'+
       '<button class="home" id="home" type="button" aria-label="Home">'+svg('home').replace('<svg','<svg style="stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"')+'</button></div>'+
       '<div class="main">'+
-        (S.edit?'<button class="editbar" data-act="done" type="button">Fertig</button><div class="hint">Zum Verschieben eine App ziehen oder antippen und dann die Zielposition antippen.</div>':'')+
+        (S.edit?'<button class="editbar" data-act="done" type="button">Fertig</button>':'')+
         '<div class="grid">'+items.join('')+'</div>'+
         (pages>1?'<button class="nav l" data-page="'+Math.max(0,S.page-1)+'" aria-label="Vorherige Seite" type="button">&lsaquo;</button><button class="nav r" data-page="'+Math.min(pages-1,S.page+1)+'" aria-label="Nächste Seite" type="button">&rsaquo;</button>':'')+
         '<div class="pager">'+(pages>1?dots:'')+'</div>'+
@@ -368,7 +375,7 @@ legend{font-weight:600;font-size:.9rem;padding:0;margin-bottom:6px}
     t=e.target.closest('[data-act]');
     if(t){var a=t.getAttribute('data-act');
       if(a==='done'){S.edit=false;S.sel=null;renderScreen()}
-      if(a==='add'){var f=document.getElementById('f-name');f.scrollIntoView({behavior:'smooth',block:'center'});f.focus()}
+      if(a==='add'){openSheet();document.getElementById('f-name').focus()}
       return}
     if(e.target.closest('#home')){goHome();return}
     t=e.target.closest('[data-dest]');
@@ -393,6 +400,14 @@ legend{font-weight:600;font-size:.9rem;padding:0;margin-bottom:6px}
     lp=setTimeout(function(){S.edit=true;renderScreen()},650);
   });
   ['pointerup','pointerleave','pointercancel'].forEach(function(ev){$screen.addEventListener(ev,function(){clearTimeout(lp)})});
+
+  /* Verwaltung ein-/ausblenden */
+  var $sheet=document.getElementById('sheet'), $gear=document.getElementById('gear');
+  function openSheet(){$sheet.hidden=false;$gear.setAttribute('aria-expanded','true')}
+  function closeSheet(){$sheet.hidden=true;$gear.setAttribute('aria-expanded','false')}
+  $gear.addEventListener('click',function(){$sheet.hidden?openSheet():closeSheet()});
+  document.getElementById('close').addEventListener('click',closeSheet);
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!$sheet.hidden)closeSheet()});
 
   /* Verschieben */
   function idxOf(id){for(var i=0;i<S.apps.length;i++)if(S.apps[i].id===id)return i;return -1}
@@ -450,7 +465,7 @@ legend{font-weight:600;font-size:.9rem;padding:0;margin-bottom:6px}
     b=e.target.closest('[data-down]'); if(b){moveBy(b.getAttribute('data-down'),1);return}
   });
   function syncEditBtn(){document.getElementById('btn-edit').setAttribute('aria-pressed',S.edit?'true':'false')}
-  document.getElementById('btn-edit').addEventListener('click',function(){S.edit=!S.edit;S.sel=null;if(S.edit)S.open=null;renderScreen()});
+  document.getElementById('btn-edit').addEventListener('click',function(){S.edit=!S.edit;S.sel=null;if(S.edit)S.open=null;renderScreen();if(S.edit)closeSheet()});
   document.getElementById('btn-reset').addEventListener('click',function(){
     S.apps=DEFAULTS.map(function(a){return Object.assign({},a)});S.recent=[];S.page=0;S.open=null;S.edit=false;
     save();renderScreen();renderList();

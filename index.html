@@ -344,7 +344,7 @@ legend{font-weight:600;font-size:.9rem;padding:0;margin-bottom:6px}
 
   var TRACKS=[['Nachtfahrt','Die Landstrassen',212],['Gegenlicht','Alma Keller',187],['Tunnelblick','Nord & Süd',243],['Zwölf Uhr Mittag','Bahnhofsorchester',199]];
   var CONTACTS=[['Anna Meier','+41 79 555 01 01'],['Marco Rossi','+41 79 555 01 02'],['Büro','+41 44 555 01 03'],['Mama','+41 79 555 01 04'],['Werkstatt Huber','+41 44 555 01 05'],['Lea Baumann','+41 79 555 01 06']];
-  var SAFE=/^(https?:|tel:|sms:|facetime:|shortcuts:|music:|podcasts:|maps:|comgooglemaps:|waze:)/i;
+  var SAFE=/^(https?:|tel:|sms:|facetime:|shortcuts:|spotify:|music:|podcasts:|maps:|comgooglemaps:|waze:)/i;
   function linkFor(a,q){
     if(!a.link||!SAFE.test(a.link))return '';
     var raw=/^(tel|sms):/i.test(a.link);
@@ -558,7 +558,7 @@ legend{font-weight:600;font-size:.9rem;padding:0;margin-bottom:6px}
     if(!editId&&S.apps.length>=MAX_APPS){err.textContent='Maximal '+MAX_APPS+' Apps möglich. Lösche zuerst eine App.';return}
 
     var link=document.getElementById('f-link').value.trim(), link2=document.getElementById('f-link2').value.trim();
-    if((link&&!SAFE.test(link))||(link2&&!SAFE.test(link2))){err.textContent='Der Link muss mit https://, tel:, sms:, shortcuts:, music:, podcasts:, maps:, comgooglemaps: oder waze: beginnen.';return}
+    if((link&&!SAFE.test(link))||(link2&&!SAFE.test(link2))){err.textContent='Der Link muss mit https://, tel:, sms:, shortcuts:, spotify:, music:, podcasts:, maps:, comgooglemaps: oder waze: beginnen.';return}
     err.textContent='';
     var data={name:name,
       icon:document.querySelector('input[name=icon]:checked').value,
@@ -608,6 +608,7 @@ legend{font-weight:600;font-size:.9rem;padding:0;margin-bottom:6px}
     {k:'gmaps',label:'Google Maps',tpl:'nav',icon:'nav',color:'#1fbf6a',link:'https://www.google.com/maps/dir/?api=1&destination={q}&travelmode=driving'},
     {k:'waze',label:'Waze',tpl:'nav',icon:'car',color:'#30b0c7',link:'https://waze.com/ul?q={q}&navigate=yes'},
     {k:'apple-music',label:'Apple Musik',tpl:'music',icon:'music',color:'#ff453a',link:'https://music.apple.com'},
+    {k:'spotify',label:'Spotify',tpl:'music',icon:'music',color:'#1fbf6a',link:'https://open.spotify.com'},
     {k:'apple-podcasts',label:'Apple Podcasts',tpl:'music',icon:'mic',color:'#af52de',link:'https://podcasts.apple.com'},
     {k:'apple-phone',label:'Telefon',tpl:'phone',icon:'phone',color:'#1fbf6a',link:'tel:{q}'},
     {k:'apple-msg',label:'Nachrichten',tpl:'msg',icon:'msg',color:'#30b0c7',link:'sms:{q}'},

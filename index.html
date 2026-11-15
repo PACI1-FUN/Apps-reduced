@@ -183,6 +183,13 @@ legend{font-weight:600;font-size:.9rem;padding:0;margin-bottom:6px}
   .row{font-size:calc(var(--u)*2.3)}
   .small{font-size:calc(var(--u)*2)}
 }
+.ico[style*="background-color"],.cover{background-image:linear-gradient(155deg,rgba(255,255,255,.42) 0%,rgba(255,255,255,.08) 38%,rgba(0,0,0,0) 55%,rgba(0,0,0,.32) 100%);box-shadow:inset 0 1px 1px rgba(255,255,255,.65),inset 0 -3px 6px rgba(0,0,0,.32),0 calc(var(--u)*.8) calc(var(--u)*1.6) rgba(0,0,0,.5)}
+.ico[style*="background-color"]::before,.cover::before{content:"";position:absolute;left:6%;right:6%;top:3%;height:38%;border-radius:inherit;background:linear-gradient(rgba(255,255,255,.26),rgba(255,255,255,0));pointer-events:none}
+.cover{position:relative}
+.ico svg,.cover svg{position:relative;filter:drop-shadow(0 2px 2px rgba(0,0,0,.4))}
+.apps li{flex-wrap:wrap}
+.apps .n{flex:1 1 130px}
+.acts{display:flex;gap:8px;margin-left:auto}
 </style>
 </head>
 <body>
@@ -223,11 +230,14 @@ legend{font-weight:600;font-size:.9rem;padding:0;margin-bottom:6px}
         <label class="f" for="f-link">Link zur echten App
           <input type="text" id="f-link" placeholder="https://… oder tel:{q}  ({q} = Ziel bzw. Nummer)" autocomplete="off" inputmode="url">
         </label>
+        <label class="f" for="f-link2">Nur zum Öffnen der App (optional)
+          <input type="text" id="f-link2" placeholder="z. B. shortcuts://run-shortcut?name=Telefon" autocomplete="off" inputmode="url">
+        </label>
         <label class="f" for="f-note">Notiz (nur bei „Allgemein“)
           <input type="text" id="f-note" maxlength="80" placeholder="Text, der in der App erscheint" autocomplete="off">
         </label>
         <p class="err" id="err" role="alert"></p>
-        <button class="btn primary" type="submit">Hinzufügen</button>
+        <div class="tools"><button class="btn primary" id="f-submit" type="submit">Hinzufügen</button><button class="btn" id="f-cancel" type="button" hidden>Abbrechen</button></div>
       </form>
     </section>
   </div>
@@ -310,12 +320,12 @@ legend{font-weight:600;font-size:.9rem;padding:0;margin-bottom:6px}
         items.push('<button class="tile add" data-act="add" type="button"><span class="ico" style="width:calc(10.4 * var(--u));height:calc(10.4 * var(--u));border-radius:calc(2.6 * var(--u));font-size:calc(5 * var(--u))">+</span><span class="lbl">Neu</span></button>');
       }else{
         var a=tiles[i];
-        items.push('<div class="tile'+(S.sel===a.id?' sel':'')+'" data-open="'+a.id+'"'+(S.edit?' draggable="true"':'')+' role="button" tabindex="0" aria-label="'+esc(a.name)+'"><span class="ico" style="background:'+a.color+'">'+svg(a.icon)+'</span><span class="lbl">'+esc(a.name)+'</span>'+(S.edit?'<button class="del" data-del="'+a.id+'" type="button" aria-label="'+esc(a.name)+' löschen">&minus;</button>':'')+'</div>');
+        items.push('<div class="tile'+(S.sel===a.id?' sel':'')+'" data-open="'+a.id+'"'+(S.edit?' draggable="true"':'')+' role="button" tabindex="0" aria-label="'+esc(a.name)+'"><span class="ico" style="background-color:'+a.color+'">'+svg(a.icon)+'</span><span class="lbl">'+esc(a.name)+'</span>'+(S.edit?'<button class="del" data-del="'+a.id+'" type="button" aria-label="'+esc(a.name)+' löschen">&minus;</button>':'')+'</div>');
       }
     }
     var dots='';
     for(var p=0;p<pages;p++)dots+='<button type="button" data-page="'+p+'" aria-label="Seite '+(p+1)+'"'+(p===S.page?' aria-current="true"':'')+'></button>';
-    var dock=dockApps().map(function(a){return '<button class="ico" data-open="'+a.id+'" style="background:'+a.color+'" type="button" aria-label="'+esc(a.name)+'">'+svg(a.icon)+'</button>'}).join('');
+    var dock=dockApps().map(function(a){return '<button class="ico" data-open="'+a.id+'" style="background-color:'+a.color+'" type="button" aria-label="'+esc(a.name)+'">'+svg(a.icon)+'</button>'}).join('');
     var now=new Date();
     $screen.className='screen'+(S.edit?' edit':'');
     $screen.innerHTML=
@@ -334,7 +344,7 @@ legend{font-weight:600;font-size:.9rem;padding:0;margin-bottom:6px}
 
   var TRACKS=[['Nachtfahrt','Die Landstrassen',212],['Gegenlicht','Alma Keller',187],['Tunnelblick','Nord & Süd',243],['Zwölf Uhr Mittag','Bahnhofsorchester',199]];
   var CONTACTS=[['Anna Meier','+41 79 555 01 01'],['Marco Rossi','+41 79 555 01 02'],['Büro','+41 44 555 01 03'],['Mama','+41 79 555 01 04'],['Werkstatt Huber','+41 44 555 01 05'],['Lea Baumann','+41 79 555 01 06']];
-  var SAFE=/^(https?:|tel:|sms:|facetime:|music:|podcasts:|maps:|comgooglemaps:|waze:)/i;
+  var SAFE=/^(https?:|tel:|sms:|facetime:|shortcuts:|music:|podcasts:|maps:|comgooglemaps:|waze:)/i;
   function linkFor(a,q){
     if(!a.link||!SAFE.test(a.link))return '';
     var raw=/^(tel|sms):/i.test(a.link);
@@ -345,13 +355,20 @@ legend{font-weight:600;font-size:.9rem;padding:0;margin-bottom:6px}
     var h=linkFor(a,q);
     return h?'<a class="pill" style="margin-top:calc(1.2 * var(--u));text-decoration:none" href="'+esc(h)+'"'+tgt(h)+'>'+esc(label)+' &#8599;</a>':'';
   }
+  function openAppLink(a,label){
+    var h=(a.link2&&SAFE.test(a.link2))?a.link2:linkFor(a,'');
+    return h?'<a class="pill" style="margin-top:calc(1.2 * var(--u));text-decoration:none" href="'+esc(h)+'"'+tgt(h)+'>'+esc(label)+' &#8599;</a>':'';
+  }
   function tgt(h){return /^https?:/i.test(h)?' target="_blank" rel="noopener"':''}
   function contactNum(name){var c=CONTACTS.filter(function(x){return x[0]===name})[0];return c?c[1]:''}
   var DESTS=[['Zuhause',12,8.4],['Arbeit',27,19.2],['Tankstelle',6,3.1],['Parkhaus Bahnhof',18,11.6]];
 
   function appView(a){
     var inner='';
-    if(a.tpl==='nav'){
+    var hl=linkFor(a,'');
+    if((a.tpl==='nav'||a.tpl==='music')&&hl){
+      inner='<div class="body" style="align-items:center;justify-content:center;flex-direction:column;text-align:center"><a class="cover" style="background-color:'+a.color+';width:calc(16 * var(--u));height:calc(16 * var(--u));text-decoration:none" href="'+esc(hl)+'"'+tgt(hl)+' aria-label="'+esc(a.name)+' öffnen">'+svg(a.icon)+'</a><div class="big" style="margin-top:calc(1.4 * var(--u))">'+esc(a.name)+'</div>'+openLink(a,'','In '+a.name+' öffnen')+'</div>';
+    }else if(a.tpl==='nav'){
       var d=DESTS[dest], eta=new Date(Date.now()+d[1]*60000);
       inner='<div class="body"><div class="list" style="width:calc(30 * var(--u))">'+
         '<div class="card"><div class="small">Ziel</div><div class="big" style="font-size:calc(2.8 * var(--u))">'+esc(d[0])+'</div><div class="small" style="margin-top:calc(.8 * var(--u))">Ankunft '+hm(eta)+' &middot; '+d[1]+' min &middot; '+String(d[2]).replace('.',',')+' km</div>'+openLink(a,d[0],'Route in '+a.name+' starten')+'</div>'+
@@ -364,7 +381,7 @@ legend{font-weight:600;font-size:.9rem;padding:0;margin-bottom:6px}
         '<circle cx="70" cy="215" r="8" fill="#fff"/><path d="M290 60l-8-18a9 9 0 1 1 16 0z" fill="#ff453a"/></svg></div></div>';
     }else if(a.tpl==='music'){
       var t=TRACKS[trackIdx];
-      inner='<div class="body" style="align-items:center"><div class="cover" style="background:'+a.color+'">'+svg('music')+'</div>'+
+      inner='<div class="body" style="align-items:center"><div class="cover" style="background-color:'+a.color+'">'+svg('music')+'</div>'+
         '<div style="flex:1;min-width:0"><div class="big" id="tt">'+esc(t[0])+'</div><div class="small" style="font-size:calc(2 * var(--u))">'+esc(t[1])+'</div>'+
         '<div class="bar"><b id="pb"></b></div><div class="small" style="display:flex;justify-content:space-between"><span id="pt">0:00</span><span>'+Math.floor(t[2]/60)+':'+pad(t[2]%60)+'</span></div>'+
         '<div class="ctrls" style="margin-top:calc(1.6 * var(--u))"><button data-m="prev" type="button" aria-label="Zurück">&#9198;</button><button class="play" data-m="play" id="pp" type="button" aria-label="Wiedergabe">'+(playing?'&#10074;&#10074;':'&#9654;')+'</button><button data-m="next" type="button" aria-label="Weiter">&#9197;</button></div><div>'+openLink(a,'','In '+a.name+' öffnen')+'</div></div></div>';
@@ -375,11 +392,11 @@ legend{font-weight:600;font-size:.9rem;padding:0;margin-bottom:6px}
       inner='<div class="body dial"><div class="keys">'+keys.map(function(k){return '<button class="key" data-key="'+k+'" type="button"'+(k==='back'?' aria-label="Löschen">&#9003;':'>'+k)+'</button>'}).join('')+'</div>'+
         '<div class="dialside"><div class="dnum" id="dnum">'+(esc(num)||'&nbsp;')+'</div>'+
         '<a class="pill'+(ok?'':' off')+'" id="dgo" style="text-decoration:none"'+(ok?' href="'+esc(go)+'"'+tgt(go):'')+'>'+(isMsg?'Nachricht schreiben':'Anrufen')+' &#8599;</a>'+
-        openLink(a,'',(isMsg?'Nachrichten':'Telefon')+'-App öffnen')+'</div></div>';
+        openAppLink(a,(isMsg?'Nachrichten':'Telefon')+'-App öffnen')+'</div></div>';
     }else{
-      inner='<div class="body" style="align-items:center;justify-content:center;flex-direction:column;text-align:center"><div class="cover" style="background:'+a.color+';width:calc(16 * var(--u));height:calc(16 * var(--u))">'+svg(a.icon)+'</div><div class="big" style="margin-top:calc(1.4 * var(--u))">'+esc(a.name)+'</div><div class="small" style="font-size:calc(2.1 * var(--u));max-width:calc(60 * var(--u))">'+esc(a.note||'Diese App hat keinen Inhalt.')+'</div>'+openLink(a,'','In '+a.name+' öffnen')+'</div>';
+      inner='<div class="body" style="align-items:center;justify-content:center;flex-direction:column;text-align:center"><div class="cover" style="background-color:'+a.color+';width:calc(16 * var(--u));height:calc(16 * var(--u))">'+svg(a.icon)+'</div><div class="big" style="margin-top:calc(1.4 * var(--u))">'+esc(a.name)+'</div><div class="small" style="font-size:calc(2.1 * var(--u));max-width:calc(60 * var(--u))">'+esc(a.note||'Diese App hat keinen Inhalt.')+'</div>'+openLink(a,'','In '+a.name+' öffnen')+'</div>';
     }
-    return '<div class="appview"><div class="apphead"><span class="ico" style="background:'+a.color+'">'+svg(a.icon)+'</span><h2>'+esc(a.name)+'</h2></div>'+inner+'</div>';
+    return '<div class="appview"><div class="apphead"><span class="ico" style="background-color:'+a.color+'">'+svg(a.icon)+'</span><h2>'+esc(a.name)+'</h2></div>'+inner+'</div>';
   }
   function afterAppView(a){
     if(a.tpl==='music')paintMusic();
@@ -510,11 +527,12 @@ legend{font-weight:600;font-size:.9rem;padding:0;margin-bottom:6px}
     var ul=document.getElementById('applist');
     if(!S.apps.length){ul.innerHTML='<li style="color:var(--muted)">Keine Apps installiert. Füge rechts eine hinzu.</li>';return}
     ul.innerHTML=S.apps.map(function(a,i){
-      return '<li><span class="chip" style="background:'+a.color+'">'+svg(a.icon)+'</span><span class="n"><b>'+esc(a.name)+'</b><small>'+TPL_LABEL[a.tpl]+(a.link?' · verknüpft':'')+'</small></span><span class="mv"><button data-up="'+a.id+'" type="button" aria-label="'+esc(a.name)+' nach oben"'+(i===0?' disabled':'')+'>&#9650;</button><button data-down="'+a.id+'" type="button" aria-label="'+esc(a.name)+' nach unten"'+(i===S.apps.length-1?' disabled':'')+'>&#9660;</button></span><button class="btn danger" data-rm="'+a.id+'" type="button" aria-label="'+esc(a.name)+' löschen">Löschen</button></li>';
+      return '<li><span class="chip" style="background-color:'+a.color+'">'+svg(a.icon)+'</span><span class="n"><b>'+esc(a.name)+'</b><small>'+TPL_LABEL[a.tpl]+(a.link?' · verknüpft':'')+'</small></span><span class="mv"><button data-up="'+a.id+'" type="button" aria-label="'+esc(a.name)+' nach oben"'+(i===0?' disabled':'')+'>&#9650;</button><button data-down="'+a.id+'" type="button" aria-label="'+esc(a.name)+' nach unten"'+(i===S.apps.length-1?' disabled':'')+'>&#9660;</button></span><span class="acts"><button class="btn" data-edit="'+a.id+'" type="button" aria-label="'+esc(a.name)+' ändern">Ändern</button><button class="btn danger" data-rm="'+a.id+'" type="button" aria-label="'+esc(a.name)+' löschen">Löschen</button></span></li>';
     }).join('');
   }
   document.getElementById('applist').addEventListener('click',function(e){
     var b=e.target.closest('[data-rm]'); if(b){removeApp(b.getAttribute('data-rm'));return}
+    b=e.target.closest('[data-edit]'); if(b){startEdit(b.getAttribute('data-edit'));return}
     b=e.target.closest('[data-up]'); if(b){moveBy(b.getAttribute('data-up'),-1);return}
     b=e.target.closest('[data-down]'); if(b){moveBy(b.getAttribute('data-down'),1);return}
   });
@@ -530,30 +548,60 @@ legend{font-weight:600;font-size:.9rem;padding:0;margin-bottom:6px}
     return '<span><input type="radio" name="icon" id="ic-'+k+'" value="'+k+'"'+(i===0?' checked':'')+'><label for="ic-'+k+'" title="'+k+'">'+svg(k)+'</label></span>';
   }).join('');
   $cols.innerHTML=COLORS.map(function(c,i){
-    return '<span><input type="radio" name="color" id="co-'+i+'" value="'+c+'"'+(i===0?' checked':'')+' aria-label="Farbe '+(i+1)+'"><label for="co-'+i+'" style="background:'+c+'"></label></span>';
+    return '<span><input type="radio" name="color" id="co-'+i+'" value="'+c+'"'+(i===0?' checked':'')+' aria-label="Farbe '+(i+1)+'"><label for="co-'+i+'" style="background-color:'+c+'"></label></span>';
   }).join('');
 
   document.getElementById('form').addEventListener('submit',function(e){
     e.preventDefault();
     var err=document.getElementById('err'), name=document.getElementById('f-name').value.trim();
     if(!name){err.textContent='Bitte einen App-Namen eingeben.';return}
-    if(S.apps.length>=MAX_APPS){err.textContent='Maximal '+MAX_APPS+' Apps möglich. Lösche zuerst eine App.';return}
+    if(!editId&&S.apps.length>=MAX_APPS){err.textContent='Maximal '+MAX_APPS+' Apps möglich. Lösche zuerst eine App.';return}
 
-    var link=document.getElementById('f-link').value.trim();
-    if(link&&!SAFE.test(link)){err.textContent='Der Link muss mit https://, tel:, sms:, music:, podcasts:, maps:, comgooglemaps: oder waze: beginnen.';return}
+    var link=document.getElementById('f-link').value.trim(), link2=document.getElementById('f-link2').value.trim();
+    if((link&&!SAFE.test(link))||(link2&&!SAFE.test(link2))){err.textContent='Der Link muss mit https://, tel:, sms:, shortcuts:, music:, podcasts:, maps:, comgooglemaps: oder waze: beginnen.';return}
     err.textContent='';
-    S.uid++;
-    var app={id:'u'+S.uid,name:name,
+    var data={name:name,
       icon:document.querySelector('input[name=icon]:checked').value,
       color:document.querySelector('input[name=color]:checked').value,
       tpl:document.getElementById('f-tpl').value,
-      note:document.getElementById('f-note').value.trim(),link:link};
-    S.apps.push(app);
-    S.page=Math.floor((S.apps.length-1)/PER_PAGE);
+      note:document.getElementById('f-note').value.trim(),link:link,link2:link2};
+    if(editId){var ex=byId(editId);if(ex)Object.assign(ex,data)}
+    else{S.uid++;S.apps.push(Object.assign({id:'u'+S.uid},data));S.page=Math.floor((S.apps.length-1)/PER_PAGE)}
     S.open=null;save();renderScreen();renderList();
-    document.getElementById('f-name').value='';document.getElementById('f-note').value='';document.getElementById('f-link').value='';document.getElementById('f-preset').value='';lastPre='';
+    resetForm();
     document.getElementById('f-name').focus();
   });
+
+  var editId=null;
+  function startEdit(id){
+    var a=byId(id); if(!a)return;
+    editId=id;
+    document.getElementById('f-preset').value='';lastPre='';
+    document.getElementById('f-name').value=a.name;
+    var ic=document.getElementById('ic-'+a.icon); if(ic)ic.checked=true;
+    var ci=COLORS.indexOf(a.color); if(ci>=0)document.getElementById('co-'+ci).checked=true;
+    document.getElementById('f-tpl').value=a.tpl;
+    document.getElementById('f-link').value=a.link||'';
+    document.getElementById('f-link2').value=a.link2||'';
+    document.getElementById('f-note').value=a.note||'';
+    document.getElementById('h-add').textContent='App ändern';
+    document.getElementById('f-submit').textContent='Speichern';
+    document.getElementById('f-cancel').hidden=false;
+    document.getElementById('err').textContent='';
+    var nm=document.getElementById('f-name');
+    try{nm.scrollIntoView({behavior:'smooth',block:'center'})}catch(e){}
+    nm.focus();
+  }
+  function resetForm(){
+    editId=null;
+    ['f-name','f-note','f-link','f-link2'].forEach(function(i){document.getElementById(i).value=''});
+    document.getElementById('f-preset').value='';lastPre='';
+    document.getElementById('h-add').textContent='App hinzufügen';
+    document.getElementById('f-submit').textContent='Hinzufügen';
+    document.getElementById('f-cancel').hidden=true;
+    document.getElementById('err').textContent='';
+  }
+  document.getElementById('f-cancel').addEventListener('click',resetForm);
 
   var PRESETS=[
     {k:'apple-maps',label:'Apple Karten',tpl:'nav',icon:'nav',color:'#2f80ed',link:'https://maps.apple.com/?daddr={q}&dirflg=d'},
